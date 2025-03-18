@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Example API
+  version: 1.0.0
+paths:
+  /users/{id}:
+    get:
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+            maximum: 1000
+            minimum: 1
+            default: 1000
+            description: ID пользователя
+      summary: Получить список пользователей
+      operationId: getUsers
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Некорректный запрос
+        '500':
+          description: Ошибка сервера
+  /users:
+    post:
+      tags:
+        - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      summary: Получить список пользователей
+      operationId: postUsers
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+
+
+
+
+
+
+
