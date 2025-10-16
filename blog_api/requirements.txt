@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic[email]
+black
+isort
+flake8
+mypy
+pre-commit
+email-validator
