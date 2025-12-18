@@ -1,0 +1,46 @@
+erDiagram
+    USERS {
+        int id PK
+        varchar email
+        varchar username
+        timestamp created_at
+    }
+    POSTS {
+        int id PK
+        int user_id FK
+        varchar title
+        text content
+        timestamp created_at
+        timestamp updated_at
+    }
+    CATEGORIES {
+        int id PK
+        varchar name
+    }
+    POST_CATEGORIES {
+        int post_id FK
+        int category_id FK
+    }
+    FAVORITES {
+        int user_id FK
+        int post_id FK
+    }
+    COMMENTS {
+        int id PK
+        int user_id FK
+        int post_id FK
+        text text
+        timestamp created_at
+    }
+    SUBSCRIPTIONS {
+        int follower_id FK
+        int following_id FK
+    }
+
+    USERS ||--o{ POSTS : "writes"
+    POSTS }o--o{ CATEGORIES : "tagged"
+    POSTS ||--o{ COMMENTS : "has"
+    USERS ||--o{ COMMENTS : "writes"
+    USERS ||--o{ FAVORITES : "saves"
+    POSTS ||--o{ FAVORITES : "saved_in"
+    USERS ||--o{ SUBSCRIPTIONS : "follows"

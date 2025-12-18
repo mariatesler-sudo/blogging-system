@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>БлогПлатформа</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo" onclick="showSection('feed')">
+        <i class="fas fa-blog"></i>
+        <span>МашкинаБлогПлатформа</span>
+      </a>
+
+      <a href="#" onclick="showSection('favorites')" id="favorites-link" class="hidden">
+        <i class="fas fa-star"></i> Избранное
+      </a>
+
+      <div class="nav-links">
+        <a href="#" onclick="showSection('feed')"><i class="fas fa-home"></i> Лента</a>
+        <a href="#" onclick="showSection('explore')"><i class="fas fa-compass"></i> Обзор</a>
+        <a href="#" onclick="showSection('search')"><i class="fas fa-search"></i> Поиск</a>
+        <a href="#" id="create-post-link" class="hidden" onclick="showSection('create-post')">
+          <i class="fas fa-pen"></i> Написать
+        </a>
+        <a href="#" id="profile-link" class="hidden" onclick="showSection('profile')">
+          <i class="fas fa-user"></i> Профиль
+        </a>
+      </div>
+
+      <div class="auth-buttons">
+        <div id="guest-buttons">
+          <button class="btn btn-outline" onclick="showAuthModal('login')">Войти</button>
+          <button class="btn btn-primary" onclick="showAuthModal('register')">Регистрация</button>
+        </div>
+
+        <div id="user-buttons" class="hidden">
+          <button class="btn btn-outline" onclick="logout()">Выйти</button>
+        </div>
+
+        <button onclick="debugToken()" style="margin-left: 10px; padding: 6px 10px; font-size: 12px; background: #ffcc00; border: none; border-radius: 6px; cursor: pointer;">
+          Отладка
+        </button>
+      </div>
+
+      <button class="menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+
+  <div id="auth-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Вход</h2>
+        <button class="close-btn" onclick="hideAuthModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="login-form">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="ваш@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Пароль</label>
+            <input type="password" id="login-password" placeholder="Введите пароль" />
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="login()">Войти</button>
+        </div>
+
+        <div id="register-form" class="hidden">
+          <div class="form-group">
+            <label for="reg-username">Имя пользователя</label>
+            <input type="text" id="reg-username" placeholder="Придумайте имя" />
+          </div>
+
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" placeholder="ваш@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Пароль</label>
+            <input type="password" id="reg-password" placeholder="Не менее 6 символов" />
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="register()">Зарегистрироваться</button>
+        </div>
+
+        <div class="form-footer">
+          <p id="form-switch">
+            Нет аккаунта? <a href="#" onclick="switchAuthForm('register')">Зарегистрируйтесь</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <main class="container">
+
+    <section id="feed-section" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-newspaper"></i> Последние посты</h1>
+
+
+        <button id="create-post-btn" class="btn btn-primary hidden" onclick="showSection('create-post')">
+          <i class="fas fa-plus"></i> Новый пост
+        </button>
+      </div>
+
+      <div id="posts-container" class="posts-grid">
+        <div class="loading">Загрузка постов...</div>
+      </div>
+        <div style="display:flex; justify-content:center; margin:20px 0;">
+            <button
+                    id="load-more-btn"
+                    class="btn btn-outline hidden"
+                    onclick="loadPosts(false)"
+            >
+                Показать ещё
+            </button>
+        </div>
+    </section>
+
+    <!-- Создание поста -->
+    <section id="create-post-section" class="content-section hidden">
+      <div class="section-header">
+        <h1><i class="fas fa-pen"></i> Новый пост</h1>
+        <button class="btn btn-outline" onclick="showSection('feed')">
+          <i class="fas fa-arrow-left"></i> Назад
+        </button>
+      </div>
+
+      <div class="post-editor">
+        <div class="form-group">
+          <input type="text" id="post-title" class="post-title-input" placeholder="Заголовок поста..." />
+        </div>
+
+        <div class="form-group">
+          <textarea id="post-content" class="post-content-input" placeholder="Расскажите свою историю..." rows="10"></textarea>
+        </div>
+
+        <div class="editor-actions">
+          <button class="btn btn-primary" onclick="createPost()">
+            <i class="fas fa-paper-plane"></i> Опубликовать
+          </button>
+          <button class="btn btn-outline" onclick="showSection('feed')">Отмена</button>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="profile-section" class="content-section hidden">
+      <div class="section-header">
+        <h1><i class="fas fa-user"></i> Мой профиль</h1>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar"><i class="fas fa-user-circle"></i></div>
+
+          <div class="profile-info">
+            <h2 id="profile-username">Загрузка...</h2>
+            <p id="profile-email">Загрузка...</p>
+            <p id="profile-bio" class="bio">Загрузка...</p>
+          </div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="stat">
+            <span class="stat-number" id="stat-posts">0</span>
+            <span class="stat-label">Постов</span>
+          </div>
+            <div class="stat">
+                <div class="stat-number" id="stat-favorites">0</div>
+                <div class="stat-label">Избранное</div>
+            </div>
+          <div class="stat">
+            <span class="stat-number" id="stat-likes">0</span>
+            <span class="stat-label">Лайков</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number" id="stat-comments">0</span>
+            <span class="stat-label">Комментариев</span>
+          </div>
+        </div>
+
+        <div id="debug-info" style="background:#f0f0f0;padding:10px;margin:10px 0;border-radius:8px;font-size:12px;color:#333;">
+          <strong>Отладка:</strong>
+          <div id="debug-content">Загрузка...</div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn btn-outline" onclick="showEditProfileModal()">
+            <i class="fas fa-edit"></i> Редактировать профиль
+          </button>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 30px;">Мои посты</h3>
+      <div id="user-posts-container" class="posts-grid"></div>
+    </section>
+
+
+    <section id="search-section" class="content-section hidden">
+        <div class="section-header">
+            <h1><i class="fas fa-search"></i> Поиск</h1>
+        </div>
+        <div class="search-tabs">
+            <div class="tab-buttons">
+                <button id="tab-posts" class="tab-btn active" onclick="switchSearchTab('posts')">
+                    <i class="fas fa-newspaper"></i> Поиск постов
+                </button>
+                <button id="tab-users" class="tab-btn" onclick="switchSearchTab('users')">
+                    <i class="fas fa-users"></i> Поиск пользователей
+                </button>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Введите поисковый запрос...">
+                <button class="btn btn-primary" onclick="performSearch()">
+                    <i class="fas fa-search"></i> Найти
+                </button>
+            </div>
+
+
+            <div id="search-results-posts"></div>
+            <div id="search-results-users" class="hidden"></div>
+        </div>
+    </section>
+
+
+
+    <section id="favorites-section" class="content-section hidden">
+      <div class="section-header">
+        <h1><i class="fas fa-star"></i> Избранные посты</h1>
+      </div>
+      <div id="favorites-container" class="posts-grid"></div>
+    </section>
+
+
+    <section id="explore-section" class="content-section hidden">
+      <div class="section-header">
+        <h1><i class="fas fa-compass"></i> Обзор</h1>
+      </div>
+      <div id="explore-content">
+        <div class="loading">Раздел в разработке</div>
+      </div>
+    </section>
+  </main>
+
+
+  <div id="edit-profile-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Редактировать профиль</h2>
+        <button class="close-btn" onclick="hideEditProfileModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="edit-username">Имя пользователя</label>
+          <input type="text" id="edit-username" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-email">Email</label>
+          <input type="email" id="edit-email" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-bio">О себе</label>
+          <textarea id="edit-bio" rows="3"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" onclick="updateProfile()">
+            <i class="fas fa-save"></i> Сохранить
+          </button>
+          <button class="btn btn-outline" onclick="hideEditProfileModal()">Отмена</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="notification" class="notification hidden"></div>
+
+
+  <div id="comments-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2 id="comments-modal-title">Комментарии</h2>
+        <button class="close-btn" onclick="hideCommentsModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="comments-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+
+        <div class="comment-form">
+          <h3>Добавить комментарий</h3>
+          <div class="form-group">
+            <textarea id="comment-text" placeholder="Ваш комментарий..." rows="3"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="addComment()">
+            <i class="fas fa-paper-plane"></i> Отправить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="footer">
+    <p>© 2025 БлогПлатформа. Машкин проект по веб-разработке.</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/bootstrap.js"></script>
+</body>
+</html>
