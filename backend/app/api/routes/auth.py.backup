@@ -1,0 +1,67 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_db
+from app.core.security import create_access_token, hash_password, verify_password
+from app.models.user import User
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+class RegisterIn(BaseModel):
+    email: str = Field(min_length=5)  # Был EmailStr
+    username: str = Field(min_length=3)
+    password: str = Field(min_length=6)
+
+
+class LoginIn(BaseModel):
+    email: str = Field(min_length=5)  # Был EmailStr
+    password: str = Field(min_length=6)
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+@router.post("/register")
+async def register(data: RegisterIn, db: AsyncSession = Depends(get_db)):
+    try:
+        # email unique
+        res = await db.execute(select(User).where(User.email == data.email))
+        if res.scalar_one_or_none() is not None:
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+        # username unique
+        res = await db.execute(select(User).where(User.username == data.username))
+        if res.scalar_one_or_none() is not None:
+            raise HTTPException(status_code=400, detail="Username already taken")
+
+        user = User(
+            email=data.email,
+            username=data.username,
+            password_hash=hash_password(data.password),
+            role="user",
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/login", response_model=TokenOut)
+async def login(data: LoginIn, db: AsyncSession = Depends(get_db)):
+    try:
+        res = await db.execute(select(User).where(User.email == data.email))
+        user = res.scalar_one_or_none()
+        if user is None or not verify_password(data.password, user.password_hash):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+
+        token = create_access_token(subject=str(user.id))
+        return {"access_token": token, "token_type": "bearer"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
